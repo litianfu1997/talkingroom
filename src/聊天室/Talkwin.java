@@ -35,6 +35,7 @@ public class Talkwin extends JFrame {
 	public Talkwin() throws IOException {
 		setTitle("聊天室");
 		setVisible(true);
+		//实例化网络通信模块，设置端口号为6000
 		DatagramSocket ds=new DatagramSocket();
 		DatagramSocket ds1 =new DatagramSocket(6000);
 		
@@ -65,29 +66,32 @@ public class Talkwin extends JFrame {
 		panel_1.setLayout(null);
 		
 		JTextArea textArea = new JTextArea();
+		//文本区添加键盘事件，敲回车就可以发送信息给对方
 		textArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent arg0) {
-				if(arg0.isControlDown()&&arg0.getKeyChar()==KeyEvent.VK_ENTER) {
-					
-					String str= textArea.getText();
+				if(arg0.getKeyChar()==KeyEvent.VK_ENTER) {
+					String str= textArea.getText();//获取文本区的文本
 					byte[] data;
 					try {
-						data = str.getBytes("utf-8");
+						data = str.trim().replace("\n", "").getBytes("utf-8");//将文本转换为以utf-8的编码格式的字节数组
 					
-					dp=new DatagramPacket(data, data.length,inet, 6000);
+					dp=new DatagramPacket(data, data.length,inet, 6000);//进行装包
 					} catch (UnsupportedEncodingException e) {
 						
 						e.printStackTrace();
 					}
 					try {
-						ds.send(dp);
+						ds.send(dp);//发送包
 					} catch (IOException e1) {
 							
 						e1.printStackTrace();
 					}
-					textArea_1.append("我：\n"+textArea.getText()+"\n");
-					textArea.setText("");
+					//将内容添加到聊天天内容显示框
+					textArea_1.append("我：\n"+textArea.getText().trim().replace("\n", "")+"\n");
+					//将输入框清空
+					textArea.setText(null);
+					
 				}
 			}
 
@@ -107,6 +111,7 @@ public class Talkwin extends JFrame {
 		contentPane.add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("发送");
+		//发送按钮添加action事件，点击发送按钮就可以发送信息给对方
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String str= textArea.getText();
@@ -147,10 +152,10 @@ public class Talkwin extends JFrame {
 				textArea.setText(null);
 			}
 		});
-		
+		//确认id按钮，在输入框输入对方的ip地址，就可以与对方聊天
 		btnNewButton_2.setBounds(20, 418, 93, 28);
 		contentPane.add(btnNewButton_2);
-		
+
 		JScrollPane scrollPane = new JScrollPane(textArea_1);
 		scrollPane.setBounds(10, 10, 511, 295);
 		contentPane.add(scrollPane);
@@ -163,7 +168,6 @@ public class Talkwin extends JFrame {
 				
 				e1.printStackTrace();
 			}
-			
 			String ip =dp1.getAddress().getHostAddress();
 			int port=dp1.getPort();
 			int length=dp1.getLength();
